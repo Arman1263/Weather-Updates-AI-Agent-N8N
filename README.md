@@ -42,6 +42,8 @@ Telegram Send Message
 Telegram User
 ```
 
+🔗 **Try the bot:** [@Weather_Update_Agent](https://t.me/armans_weather_agent_bot)
+
 ## 📸 Workflow
 
 ![Weather Update Agent Workflow](workflow.png)
