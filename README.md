@@ -45,7 +45,10 @@ Telegram User
 ## 📸 Workflow
 
 ![Weather Update Agent Workflow](workflow.png)
-![Telegram Interface](workflow.png)
+
+<br>
+
+![Telegram Interface](Telegram_Interface.jpeg)
 
 ## 🧰 Tech Stack
 
