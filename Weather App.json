@@ -1,0 +1,266 @@
+{
+  "name": "Weather App",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "fe2486bb-3795-4808-b4f5-1489b489fb3b",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        192,
+        0
+      ],
+      "webhookId": "4fba6e68-819f-4ef7-99bc-b9a56efb4ce3",
+      "credentials": {
+        "telegramApi": {
+          "id": "qc6fLsgSWSPMA6Ap",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are a helpful weather assistant.\n\nWhen the user asks for weather:\n1. Identify the location from the user's message. If the user does not name a location but a location was used earlier in the conversation, reuse that most recent location.\n2. Use the location search tool to find its latitude and longitude.\n3. Use the weather API tool with those coordinates. This tool returns BOTH current conditions and a daily forecast for today and the next several days.\n4. Answer using the returned data: for \"now\"/\"current\" use the current block; for \"today\", \"tomorrow\", or a specific upcoming day, use the matching entry from the daily forecast block (the daily.time array lists the dates).\n5. Never invent weather information. If a requested day is beyond the forecast range, say so.\n6. Keep the response concise, clear, and useful.\n7. Explain weather codes in simple language when relevant.\n\nIf the user does not specify a location and none was mentioned earlier, ask them which location they want.\n\nFORMATTING: The reply is sent to Telegram with HTML parse mode. Format your answer using ONLY Telegram-supported HTML tags: <b>bold</b>, <i>italic</i>, <code>code</code>. Do NOT use Markdown (no ** or * characters) and do NOT use bullet characters like *. For lists, put each item on its own line with a leading \"- \". Never emit unescaped <, > or & characters other than in the allowed tags."
+        }
+      },
+      "id": "0a4dfb87-09e9-4198-af12-8b6df342d0e9",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        672,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-3.6-flash",
+        "options": {}
+      },
+      "id": "d3098306-c1a3-413f-9287-faf13f1bf46c",
+      "name": "Google Gemini Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        544,
+        208
+      ],
+      "retryOnFail": true,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "5jNZUeyoCsDOcHT9",
+          "name": "Google Gemini(PaLM) Api account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "id": "fdf48075-e996-4fe9-beec-89689273d3e3",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        688,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Search for the latitude and longitude of a city or location.\nUse this tool whenever the user asks for weather for a specific location.",
+        "url": "https://geocoding-api.open-meteo.com/v1/search",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', ``, 'string') }}"
+            },
+            {
+              "name": "count",
+              "value": "1"
+            },
+            {
+              "name": "language",
+              "value": "en"
+            },
+            {
+              "name": "format",
+              "value": "json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6d3e2ff5-751b-4107-b855-3ede231ffecb",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        992,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "Get the weather for a location using its latitude and longitude. Returns BOTH the current conditions AND a multi-day daily forecast (today plus the next 6 days), so it answers questions about now, today, tomorrow, and upcoming days.\nUse this tool after finding the coordinates of the requested location.",
+        "url": "https://api.open-meteo.com/v1/forecast",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "latitude",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters0_Value', `The latitude of the location returned by the geocoding tool.`, 'string') }}"
+            },
+            {
+              "name": "longitude",
+              "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('parameters1_Value', `The longitude of the location returned by the geocoding tool.`, 'string') }}"
+            },
+            {
+              "name": "current",
+              "value": "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m"
+            },
+            {
+              "name": "daily",
+              "value": "weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max,wind_speed_10m_max"
+            },
+            {
+              "name": "forecast_days",
+              "value": "7"
+            },
+            {
+              "name": "timezone",
+              "value": "auto"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "378d56b6-3545-40a9-84f5-68b016aa7584",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.5,
+      "position": [
+        816,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "parse_mode": "HTML"
+        }
+      },
+      "id": "33bfd42f-241e-4f17-a676-dd9ff4945cfb",
+      "name": "Send a text message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        0
+      ],
+      "webhookId": "f445f96d-9914-441c-a05e-b91e96dd60bc",
+      "credentials": {
+        "telegramApi": {
+          "id": "qc6fLsgSWSPMA6Ap",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "13c74b1e-c45f-451b-aaa6-b8ad93cd28c7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6b827abd43d1a0ea6bede8940e325ff8df7405a6640461023636127cce685f54"
+  },
+  "nodeGroups": [],
+  "id": "PRT33MpkKo02ZQBL",
+  "tags": []
+}
