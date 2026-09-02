@@ -42,6 +42,11 @@ Telegram Send Message
 Telegram User
 ```
 
+## 📸 Workflow
+
+![Weather Update Agent Workflow](workflow.png)
+![Telegram Interface](workflow.png)
+
 ## 🧰 Tech Stack
 
 | Technology | Purpose |
