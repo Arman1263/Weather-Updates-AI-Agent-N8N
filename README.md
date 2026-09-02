@@ -4,6 +4,10 @@ An AI-powered weather assistant built with **n8n**, **Google Gemini**, **Open-Me
 
 The agent lets users request weather information naturally through Telegram. It identifies the requested location, retrieves coordinates, fetches current weather and a 7-day forecast, uses Gemini to interpret the data, and sends a concise response back to Telegram.
 
+
+🔗 **Try the bot:** [@Weather_Update_Agent](https://t.me/armans_weather_agent_bot)
+
+
 ## ✨ Features
 
 - 💬 Natural-language weather requests through Telegram
@@ -41,8 +45,6 @@ Telegram Send Message
      ▼
 Telegram User
 ```
-
-🔗 **Try the bot:** [@Weather_Update_Agent](https://t.me/armans_weather_agent_bot)
 
 ## 📸 Workflow
 
